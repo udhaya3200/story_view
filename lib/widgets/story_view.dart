@@ -24,10 +24,10 @@ class StoryItem {
 
   /// Has this page been shown already? This is used to indicate that the page
   /// has been displayed. If some pages are supposed to be skipped in a story,
-  /// mark them as shown `shown = true`.
+  /// mark them as shown shown = true.
   ///
   /// However, during initialization of the story view, all pages after the
-  /// last unshown page will have their `shown` attribute altered to false. This
+  /// last unshown page will have their shown attribute altered to false. This
   /// is because the next item to be displayed is taken by the last unshown
   /// story item.
   bool shown;
@@ -103,7 +103,7 @@ class StoryItem {
   }
 
   /// Factory constructor for page images. [controller] should be same instance as
-  /// one passed to the `StoryView`
+  /// one passed to the StoryView
   factory StoryItem.pageImage({
     required String url,
     required StoryController controller,
@@ -161,7 +161,7 @@ class StoryItem {
   }
 
   /// Shorthand for creating inline image. [controller] should be same instance as
-  /// one passed to the `StoryView`
+  /// one passed to the StoryView
   factory StoryItem.inlineImage({
     required String url,
     Text? caption,
@@ -215,7 +215,7 @@ class StoryItem {
   }
 
   /// Shorthand for creating page video. [controller] should be same instance as
-  /// one passed to the `StoryView`
+  /// one passed to the StoryView
   factory StoryItem.pageVideo(
     String url, {
     required StoryController controller,
@@ -263,8 +263,8 @@ class StoryItem {
         duration: duration ?? Duration(seconds: 10));
   }
 
-  /// Shorthand for creating a story item from an image provider such as `AssetImage`
-  /// or `NetworkImage`. However, the story continues to play while the image loads
+  /// Shorthand for creating a story item from an image provider such as AssetImage
+  /// or NetworkImage. However, the story continues to play while the image loads
   /// up.
   factory StoryItem.pageProviderImage(
     ImageProvider image, {
@@ -322,8 +322,8 @@ class StoryItem {
         duration: duration ?? Duration(seconds: 3));
   }
 
-  /// Shorthand for creating an inline story item from an image provider such as `AssetImage`
-  /// or `NetworkImage`. However, the story continues to play while the image loads
+  /// Shorthand for creating an inline story item from an image provider such as AssetImage
+  /// or NetworkImage. However, the story continues to play while the image loads
   /// up.
   factory StoryItem.inlineProviderImage(
     ImageProvider image, {
@@ -378,7 +378,7 @@ class StoryView extends StatefulWidget {
   final List<StoryItem?> storyItems;
 
   /// Callback for when a full cycle of story is shown. This will be called
-  /// each time the full story completes when [repeat] is set to `true`.
+  /// each time the full story completes when [repeat] is set to true.
   final VoidCallback? onComplete;
 
   /// Callback for when a vertical swipe gesture is detected. If you do not
@@ -397,8 +397,8 @@ class StoryView extends StatefulWidget {
   final bool repeat;
 
   /// If you would like to display the story as full-page, then set this to
-  /// `false`. But in case you would display this as part of a page (eg. in
-  /// a [ListView] or [Column]) then set this to `true`.
+  /// false. But in case you would display this as part of a page (eg. in
+  /// a [ListView] or [Column]) then set this to true.
   final bool inline;
 
   // Controls the playback of the stories
@@ -409,18 +409,22 @@ class StoryView extends StatefulWidget {
   // Indicator Foreground Color
   final Color? indicatorForegroundColor;
 
-  StoryView({
-    required this.storyItems,
-    required this.controller,
-    this.onComplete,
-    this.onStoryShow,
-    this.progressPosition = ProgressPosition.top,
-    this.repeat = false,
-    this.inline = false,
-    this.onVerticalSwipeComplete,
-    this.indicatorColor,
-    this.indicatorForegroundColor,
-  });
+  final int? pageIndex;
+  final PageController? pagecontroller;
+
+  StoryView(
+      {required this.storyItems,
+      required this.controller,
+      this.onComplete,
+      this.onStoryShow,
+      this.progressPosition = ProgressPosition.top,
+      this.repeat = false,
+      this.inline = false,
+      this.onVerticalSwipeComplete,
+      this.indicatorColor,
+      this.indicatorForegroundColor,
+      this.pageIndex = 0,
+      this.pagecontroller});
 
   @override
   State<StatefulWidget> createState() {
@@ -713,6 +717,12 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
             child: SizedBox(
                 child: GestureDetector(onTap: () {
                   widget.controller.previous();
+                  if (widget.pageIndex != 0 &&
+                      (widget.storyItems.first == _currentStory)) {
+                    widget.pagecontroller!.animateToPage(widget.pageIndex! - 1,
+                        duration: Duration(milliseconds: 100),
+                        curve: Curves.easeIn);
+                  }
                 }),
                 width: 70),
           ),
@@ -806,7 +816,7 @@ class PageBarState extends State<PageBar> {
 /// Custom progress bar. Supposed to be lighter than the
 /// original [ProgressIndicator], and rounded at the sides.
 class StoryProgressIndicator extends StatelessWidget {
-  /// From `0.0` to `1.0`, determines the progress of the indicator
+  /// From 0.0 to 1.0, determines the progress of the indicator
   final double value;
   final double indicatorHeight;
   final Color? indicatorColor;
@@ -826,11 +836,11 @@ class StoryProgressIndicator extends StatelessWidget {
         this.indicatorHeight,
       ),
       foregroundPainter: IndicatorOval(
-        this.indicatorForegroundColor?? Colors.white.withOpacity(0.8),
+        this.indicatorForegroundColor ?? Colors.white.withOpacity(0.8),
         this.value,
       ),
       painter: IndicatorOval(
-        this.indicatorColor?? Colors.white.withOpacity(0.4),
+        this.indicatorColor ?? Colors.white.withOpacity(0.4),
         1.0,
       ),
     );

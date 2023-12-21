@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:video_player/video_player.dart';
-
 import '../utils.dart';
 import '../controller/story_controller.dart';
 
@@ -20,23 +18,23 @@ class VideoLoader {
   VideoLoader(this.url, {this.requestHeaders});
 
   void loadVideo(VoidCallback onComplete) {
-    if (this.videoFile != null) {
+    if (this.url != null) {
       this.state = LoadState.success;
       onComplete();
     }
 
-    final fileStream = DefaultCacheManager()
-        .getFileStream(this.url, headers: this.requestHeaders as Map<String, String>?);
+    // final fileStream = DefaultCacheManager().getFileStream(this.url,
+    //     headers: this.requestHeaders as Map<String, String>?);
 
-    fileStream.listen((fileResponse) {
-      if (fileResponse is FileInfo) {
-        if (this.videoFile == null) {
-          this.state = LoadState.success;
-          this.videoFile = fileResponse.file;
-          onComplete();
-        }
-      }
-    });
+    // fileStream.listen((fileResponse) {
+    //   if (fileResponse is FileInfo) {
+    //     if (this.videoFile == null) {
+    //       this.state = LoadState.success;
+    //       this.videoFile = fileResponse.file;
+    //       onComplete();
+    //     }
+    //   }
+    // });
   }
 }
 
@@ -79,8 +77,8 @@ class StoryVideoState extends State<StoryVideo> {
 
     widget.videoLoader.loadVideo(() {
       if (widget.videoLoader.state == LoadState.success) {
-        this.playerController =
-            VideoPlayerController.file(widget.videoLoader.videoFile!);
+        this.playerController = VideoPlayerController.networkUrl(
+            Uri.parse(widget.videoLoader.url!));
 
         playerController!.initialize().then((v) {
           setState(() {});
@@ -125,13 +123,14 @@ class StoryVideoState extends State<StoryVideo> {
               ),
             ),
           )
-        : Center(
-            child: Text(
-            "Media failed to load.",
-            style: TextStyle(
-              color: Colors.white,
-            ),
-          ));
+        : Center(child: CircularProgressIndicator.adaptive()
+            //    Text(
+            //   "Media failed to load.",
+            //   style: TextStyle(
+            //     color: Colors.white,
+            //   ),
+            // )
+            );
   }
 
   @override
